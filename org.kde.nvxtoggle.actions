@@ -1,0 +1,5 @@
+[org.kde.nvxtoggle.toggle]
+Name=Toggle
+Description=Toggle GPU state
+Policy=auth_admin
+Persistence=session

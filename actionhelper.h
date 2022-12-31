@@ -1,17 +1,15 @@
 #pragma once
+
 #include <QObject>
 #include <QProcess>
-#include <KAuth>
+#include <KAuth/Action>
+#include <KAuth/ActionReply>
+#include <KAuth/ExecuteJob>
+#include <KAuth/HelperSupport>
 
-#define ACTION_STATUS_PATH "toggleStatus"
-
-using namespace KAuth;
-
-class ActionHelper : public QObject {
+class ActionHelper: public QObject {
     Q_OBJECT
-public:
-    explicit ActionHelper(QObject *parent = nullptr);
 
 public Q_SLOTS:
-    KAuth::ActionReply toggle(const QVariantMap &args);
+    KAuth::ActionReply toggle(const QVariantMap& args);
 };
