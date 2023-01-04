@@ -4,6 +4,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QSystemTrayIcon>
+#include <QMenu>
 #include <cstring>
 
 class Window: public QWidget {
@@ -20,8 +21,11 @@ private:
     std::string labelString;
     std::string buttonString;
     void GetCurrentStatus();
-    void UpdateStrings();
+    void UpdateStringsAndIcons();
+    QSystemTrayIcon* BuildTrayIcon(Window* window);
     bool status;
+    QAction* quitAction;
+    QMenu* trayIconMenu;
 
 private slots:
     void ToggleStatus();
@@ -29,7 +33,8 @@ private slots:
 
     // QWidget interface
 protected:
-    void focusInEvent(QFocusEvent* event);
+    void focusInEvent(QFocusEvent* event) override;
+    void closeEvent(QCloseEvent* event) override;
 
 public:
     bool event(QEvent* event);

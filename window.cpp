@@ -1,6 +1,7 @@
 #include "actionIDs.h"
 #include "window.h"
 #include <QApplication>
+#include <QCloseEvent>
 #include <QProcess>
 #include <QProcessEnvironment>
 #include <QStyle>
@@ -31,12 +32,18 @@ QPushButton* BuildButton(Window* window) {
     return button;
 }
 
-QSystemTrayIcon* BuildTrayIcon(Window* window) {
+QSystemTrayIcon* Window::BuildTrayIcon(Window* window) {
     QSystemTrayIcon* trayIcon = new QSystemTrayIcon(window);
     QStyle* style = window->style();
     QIcon icon = style->standardIcon(style->SP_DriveHDIcon);
     trayIcon->setIcon(icon);
+    trayIconMenu = new QMenu(this);
+    quitAction = new QAction(tr("&Quit"), this);
+    connect(quitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
+    trayIconMenu->addAction(quitAction);
+    trayIcon->setContextMenu(trayIconMenu);
     trayIcon->setToolTip("show nvx-toggle");
+    trayIcon->show();
     return trayIcon;
 }
 
@@ -50,6 +57,7 @@ Window::Window(QWidget* parent)
     button = BuildButton(this);
     trayIcon = BuildTrayIcon(this);
 
+    UpdateStringsAndIcons();
     GetCurrentStatus();
 
     connect(button, SIGNAL(clicked()), this, SLOT(ToggleStatus()));
@@ -64,10 +72,10 @@ void Window::GetCurrentStatus() {
     QString output(process.readAllStandardOutput());
     status = output.contains("on");
     if (status != previousStatus)
-        UpdateStrings();
+        UpdateStringsAndIcons();
 }
 
-void Window::UpdateStrings() {
+void Window::UpdateStringsAndIcons() {
     labelString = status ? "nvidia GPU is currently on" : "nvidia GPU is currently off";
     label->setText(labelString.c_str());
     buttonString = status ? "Toggle off" : "Toggle on";
@@ -90,10 +98,11 @@ void Window::ToggleStatus() {
 }
 
 void Window::SystemTrayActivated(QSystemTrayIcon::ActivationReason reason) {
-    if (reason == QSystemTrayIcon::Trigger) {
+    if (reason == QSystemTrayIcon::Trigger && !isVisible()) {
         GetCurrentStatus();
         show();
-        trayIcon->hide();
+        activateWindow();
+        raise();
     }
 }
 
@@ -103,9 +112,17 @@ void Window::focusInEvent(QFocusEvent* event) {
     GetCurrentStatus();
 }
 
+void Window::closeEvent(QCloseEvent* event) {
+    if (!event->spontaneous() || !isVisible())
+        return;
+    if (trayIcon->isVisible()) {
+        hide();
+        event->ignore();
+    }
+}
+
 bool Window::event(QEvent* event) {
     if (event->type() == QEvent::WindowStateChange && isMinimized()) {
-        trayIcon->show();
         hide();
         event->ignore();
         return true;
