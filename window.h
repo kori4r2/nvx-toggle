@@ -6,6 +6,7 @@
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include <cstring>
+#include "trayicon.h"
 
 class Window: public QWidget {
     Q_OBJECT
@@ -16,16 +17,13 @@ public:
 private:
     QLabel* label;
     QPushButton* button;
-    QSystemTrayIcon* trayIcon;
+    TrayIcon trayIcon;
     QString envPath;
     std::string labelString;
     std::string buttonString;
     void GetCurrentStatus();
     void UpdateStringsAndIcons();
-    QSystemTrayIcon* BuildTrayIcon(Window* window);
     bool status;
-    QAction* quitAction;
-    QMenu* trayIconMenu;
 
 private slots:
     void ToggleStatus();

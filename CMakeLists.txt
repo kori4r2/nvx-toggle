@@ -20,7 +20,7 @@ find_package(Qt5Gui)
 find_package(KF5Auth)
 
 set(HELPER "actionhelper.cpp")
-set(SOURCES "main.cpp" "window.cpp")
+set(SOURCES "main.cpp" "window.cpp" "trayicon.cpp")
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Core Qt5::Gui KF5::Auth)

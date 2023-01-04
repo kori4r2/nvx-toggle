@@ -32,36 +32,20 @@ QPushButton* BuildButton(Window* window) {
     return button;
 }
 
-QSystemTrayIcon* Window::BuildTrayIcon(Window* window) {
-    QSystemTrayIcon* trayIcon = new QSystemTrayIcon(window);
-    QStyle* style = window->style();
-    QIcon icon = style->standardIcon(style->SP_DriveHDIcon);
-    trayIcon->setIcon(icon);
-    trayIconMenu = new QMenu(this);
-    quitAction = new QAction(tr("&Quit"), this);
-    connect(quitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
-    trayIconMenu->addAction(quitAction);
-    trayIcon->setContextMenu(trayIconMenu);
-    trayIcon->setToolTip("show nvx-toggle");
-    trayIcon->show();
-    return trayIcon;
-}
-
 Window::Window(QWidget* parent)
-    : QWidget(parent) {
+    : QWidget(parent), trayIcon(this) {
     setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     setFocusPolicy(Qt::WheelFocus);
 
     envPath = QProcessEnvironment::systemEnvironment().value("PATH");
     label = BuildLabel(this);
     button = BuildButton(this);
-    trayIcon = BuildTrayIcon(this);
 
     UpdateStringsAndIcons();
     GetCurrentStatus();
 
     connect(button, SIGNAL(clicked()), this, SLOT(ToggleStatus()));
-    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(SystemTrayActivated(QSystemTrayIcon::ActivationReason)));
+    trayIcon.ConnectActivationSlot(this, SLOT(SystemTrayActivated(QSystemTrayIcon::ActivationReason)));
 }
 
 void Window::GetCurrentStatus() {
@@ -115,7 +99,7 @@ void Window::focusInEvent(QFocusEvent* event) {
 void Window::closeEvent(QCloseEvent* event) {
     if (!event->spontaneous() || !isVisible())
         return;
-    if (trayIcon->isVisible()) {
+    if (trayIcon.isVisible()) {
         hide();
         event->ignore();
     }
