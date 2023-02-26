@@ -64,6 +64,7 @@ void Window::UpdateStringsAndIcons() {
     label->setText(labelString.c_str());
     buttonString = status ? "Toggle off" : "Toggle on";
     button->setText(buttonString.c_str());
+    trayIcon.UpdateIcon(status);
 }
 
 void Window::ToggleStatus() {
